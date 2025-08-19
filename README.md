@@ -136,7 +136,7 @@ Analytics module uses **Node.js with SQLite**.
 Run with:
 
 ```bash
-npm run analyse
+ts-node analytics/analyse.ts
 ```
 
 ---
