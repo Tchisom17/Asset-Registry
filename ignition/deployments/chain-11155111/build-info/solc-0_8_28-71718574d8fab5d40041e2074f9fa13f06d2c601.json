@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-71718574d8fab5d40041e2074f9fa13f06d2c601",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/AssetRegistry.sol": "project/contracts/AssetRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/AssetRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract AssetRegistry {\n    struct Asset {\n        uint256 id;\n        address owner;\n        string description;\n        uint256 registeredAt;\n    }\n\n    mapping(uint256 => Asset) private _assets;\n    mapping(uint256 => bool) private _exists;\n    uint256 private _nextId = 1;\n\n    event AssetRegistered(\n        uint256 indexed assetId,\n        address indexed owner,\n        string description,\n        uint256 timestamp\n    );\n\n    event OwnershipTransferred(\n        uint256 indexed assetId,\n        address indexed previousOwner,\n        address indexed newOwner,\n        uint256 timestamp\n    );\n\n    function registerAsset(string calldata description) external returns (uint256) {\n        uint256 assetId = _nextId++;\n        require(!_exists[assetId], \"Already exists\");\n\n        Asset memory a = Asset(assetId, msg.sender, description, block.timestamp);\n        _assets[assetId] = a;\n        _exists[assetId] = true;\n\n        emit AssetRegistered(assetId, msg.sender, description, block.timestamp);\n        return assetId;\n    }\n\n    function transferAsset(uint256 assetId, address newOwner) external {\n        require(_exists[assetId], \"Asset missing\");\n        require(newOwner != address(0), \"Invalid new owner\");\n\n        Asset storage a = _assets[assetId];\n        require(msg.sender == a.owner, \"Only owner\");\n\n        address prev = a.owner;\n        a.owner = newOwner;\n\n        emit OwnershipTransferred(assetId, prev, newOwner, block.timestamp);\n    }\n\n    function getAsset(uint256 assetId)\n        external\n        view\n        returns (uint256 id, address owner, string memory description, uint256 registeredAt)\n    {\n        require(_exists[assetId], \"Asset missing\");\n        Asset storage a = _assets[assetId];\n        return (a.id, a.owner, a.description, a.registeredAt);\n    }\n\n    function exists(uint256 assetId) external view returns (bool) {\n        return _exists[assetId];\n    }\n\n    function nextId() external view returns (uint256) {\n        return _nextId;\n    }\n}\n"
+      }
+    }
+  }
+}
